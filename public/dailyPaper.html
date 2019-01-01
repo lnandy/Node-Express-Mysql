@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>CPC Daily Paper</title>
+    <link rel="stylesheet" href="css/style.css" media="screen" type="text/css" />
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+</head>
+
+<body>
+
+  <div class="container">
+      <form id="contact" style="margin-top: 30px;" autocomplete="on">
+        <h3>Quick Report</h3>
+        <hr style="height:20px;border:none;"></hr>
+        <fieldset>
+          <input placeholder="姓名" type="text" tabindex="1" required autofocus data-key="name">
+        </fieldset>
+        <fieldset>
+          <input placeholder="项目名" type="text" tabindex="2" required data-key="project_name">
+        </fieldset>
+        <fieldset>
+          <input placeholder="任务描述" type="text" tabindex="3" required data-key="task_desc">
+        </fieldset>
+        <fieldset>
+          <input placeholder="计划完成时间" type="text" tabindex="4" required data-key="planned_date">
+        </fieldset>
+        <fieldset>
+          <input placeholder="当天任务工作时间" type="text" tabindex="4" required data-key="man_hour">
+        </fieldset>
+        <fieldset>
+          <input placeholder="完成任务百分比" type="text" tabindex="4" required data-key="complate_rate">
+        </fieldset>
+        <fieldset>
+          <input placeholder="任务延期原因" type="text" data-key="delay_reason"></input>
+        </fieldset>
+        <fieldset>
+          <button name="submit" type="submit" id="submit">Submit</button>
+          <button class="hide" name="submit" type="button" id="query" onclick="submitFrom()">Query</button>
+          <button class="hide" name="submit" type="button" id="delete" onclick="submitFrom()">Delete</button>
+        </fieldset>
+      </form>
+      <div class="right_container">
+        <h3>Quick SQL Insert</h3>
+        <hr style="height:20px;border:none;"></hr>
+        <textarea id="sqlinput" style="height: 355px;margin-bottom: 5px;resize:none;width: 350px;"></textarea>
+        <button name="submit" type="submit" id="insert">Insert</button>
+      </div>
+    </div>
+<div style="text-align:center;clear:both">
+<script type="text/javascript">
+    $(document).ready(function(){
+      $('#sqlinput').val(
+        `INSERT INTO daily_paper (`+
+            "`date`,`name`,`project_name`,`task_desc`," +
+            "`planned_date`,`man_hour`,`complate_rate`,`delay_reason`) "+
+        `VALUES
+(
+    now(),
+    '姓名',
+    'BSS3.0',
+    '任务名',` + "\n   " +
+    getDate() + `,
+    '8',
+    '进度',
+    ''
+);`
+      )
+    })
+    $("#contact").on("submit", function(ev) {
+        var data = {};
+        var tagElements = document.getElementsByTagName('input');
+        for (var j = 0; j < tagElements.length; j++){
+            data[tagElements[j].dataset.key] = tagElements[j].value;
+        }
+        $.ajax({
+            type: "POST",
+            url: "http://10.4.124.16:9080/submit",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(data),
+            dataType: "json",
+            success: function (message) {
+                if(!message.code){
+                    alert('提交成功')
+                }else{
+                    alert('提交失败');
+                }
+            },
+            error: function (message) {
+                alert('提交失败')
+            }
+        });
+        ev.preventDefault();
+    });
+    $("#insert").click( function(ev) {
+        var data = { sql: $('#sqlinput').val() };
+        $.ajax({
+            type: "POST",
+            url: "http://10.4.124.16:9080/insert",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(data),
+            dataType: "json",
+            success: function (message) {
+                if(!message.code){
+                    alert('提交成功')
+                }else{
+                    alert('提交失败');
+                }
+            },
+            error: function (message) {
+                alert('提交失败')
+            }
+        });
+        ev.preventDefault();
+    });
+    function getDate(){
+        var y = new Date().getFullYear();
+        var m = ('0' + (new Date().getMonth() + 1)).substr(-2);
+        var d = ('0' + new Date().getDate()).substr(-2);
+        return  "'"+ y +"-"+ m +"-"+ d + "'";
+    }
+</script>
+</div>
+</body>
+
+</html>
